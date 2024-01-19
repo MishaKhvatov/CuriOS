@@ -1,0 +1,21 @@
+# Ignore the bin directory
+bin/
+
+# Ignore the build directory
+build/
+
+# Ignore object files
+*.o
+
+# Ignore assembled binaries
+*.bin
+
+# Ignore any log files
+*.log
+
+# Ignore other common backup files
+*~
+.*.swp
+.DS_Store
+
+# If you have any specific IDE or editor configurations, ignore them
