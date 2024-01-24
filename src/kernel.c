@@ -2,7 +2,7 @@
 #include <stdint.h> // Standard integer types.
 #include <stddef.h> // Standard definition types.
 #include "idt/idt.h"
-
+#include "io/io.h"
 // VGA text mode video memory start address.
 uint16_t* video_mem = 0;
 
@@ -78,9 +78,9 @@ void print(const char* str) {
 // Main function of the kernel.
 void kernel_main() {
     terminal_initialize();
-    print("Hello world");
-    
+    print("Hello World! \n");
     //Initilize the interrupt descriptor table
     idt_init();
-
-}
+    enable_interrupts();
+    
+ }

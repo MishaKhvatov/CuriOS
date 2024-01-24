@@ -13,7 +13,7 @@ make clean
 cd bin
 
 # Run the OS image in QEMU
-qemu-system-x86_64 -hda ./os.bin
+qemu-system-i386  -hda ./os.bin
 
 # Return to the original directory
 cd ..

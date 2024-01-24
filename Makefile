@@ -11,10 +11,11 @@ BIN_DIR = ./bin
 BUILD_DIR = ./build
 IDT_DIR = $(BUILD_DIR)/idt
 MEMORY_DIR = $(BUILD_DIR)/memory
+IO_DIR = $(BUILD_DIR)/io
 
 # Files
-FILES = $(BUILD_DIR)/kernel.asm.o $(BUILD_DIR)/kernel.o $(IDT_DIR)/idt.asm.o $(IDT_DIR)/idt.o $(MEMORY_DIR)/memory.o
-KERNEL_BIN = $(BIN_DIR)/kernel.bin
+FILES = $(BUILD_DIR)/kernel.asm.o $(BUILD_DIR)/kernel.o $(IDT_DIR)/idt.asm.o $(IDT_DIR)/idt.o $(MEMORY_DIR)/memory.o  $(IO_DIR)/io.asm.o
+KERNEL_BIN = $(BIN_DIR)/kernel.bin 
 BOOT_BIN = $(BIN_DIR)/boot.bin
 OS_IMAGE = $(BIN_DIR)/os.bin
 
@@ -33,8 +34,7 @@ os_image:
 
 # Directory structure
 dirs:
-	mkdir -p $(BIN_DIR) $(BUILD_DIR) $(IDT_DIR) $(MEMORY_DIR)
-
+	mkdir -p $(BIN_DIR) $(BUILD_DIR) $(IDT_DIR) $(MEMORY_DIR) $(IO_DIR)
 # Kernel binary
 $(KERNEL_BIN): $(FILES)
 	$(LD) $(LDFLAGS) $(FILES) -o $(BUILD_DIR)/kernelfull.o

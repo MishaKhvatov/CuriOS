@@ -1,21 +1,16 @@
-#ifndef IDT_H
-#define IDT_H
-#include <stdint.h> 
-
-// Structure defining an individual interrupt descriptor.
-struct idt_desc {
-    uint16_t offset_1; // Lower 16 bits of the interrupt handler's address
-    uint16_t selector; // Code segment selector in GDT or LDT
-    uint8_t zero;      // This byte is always set to zero
-    uint8_t type_attr; // Type and attributes; see below for details
-    uint16_t offset_2; // Higher 16 bits of the interrupt handler's address
-} __attribute__((packed));
-
-// Structure defining the IDTR (Interrupt Descriptor Table Register) descriptor.
-struct idtr_desc {
-    uint16_t limit; // Size of the IDT - 1 (since IDT size cannot be zero)
-    uint32_t base;  // Base address of the start of the IDT
-} __attribute__((packed));
-
+#include <stdint.h>
 void idt_init();
-#endif
+extern void enable_interrupts();
+extern void disable_interrupts();
+typedef struct{
+    uint16_t offset_low; //low part of the address
+    uint16_t segment; //segment selector
+    uint8_t reserved;
+    uint8_t flags;
+    uint16_t offset_high;
+} __attribute__((packed)) idt_entry_t;
+
+typedef struct {
+	uint16_t	limit;
+	uint32_t	base;
+} __attribute__((packed)) idtr_t;
