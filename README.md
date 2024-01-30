@@ -7,81 +7,60 @@ CuriOS is a simple educational and hobbyist operating system kernel designed to 
 ## Components
 
 - **Bootloader (`boot.asm`):** Initializes the system and loads the kernel into memory.
-- **Kernel (`kernel.asm`, `kernel.c`):** Represents the core part of the operating system, managing system resources, and providing basic services including screen output.
+- **Kernel (`kernel.asm`, `kernel.c`):** Represents the core part of the operating system, managing system resources, and providing basic services including screen output. It now includes functionality to remap the PIC and handle keyboard interrupts.
 - **Makefile:** Automates the compilation and linking process.
 - **Linker Script (`linker.ld`):** Defines the memory layout of the kernel.
 - **Run Script (`run_os.sh`):** Streamlines the process of building and running the OS.
+- **IDT Functionality (`/idt/idt.asm`, `/idt/idt.c`, `/idt/idt.h`):** Implements the Interrupt Descriptor Table (IDT) and handles keyboard interrupts.
+- **Memory Utilities (`/memory`):** Contains a simple `memset` function for memory management.
+- **I/O Utilities (`/io/io.asm`, `/io/io.h`):** Provides basic I/O functionality for writing to ports.
 
-### Bootloader (`boot.asm`)
+### IDT Functionality (`/idt`)
 
 #### Key Features
 
-- **16-bit Real Mode Entry:** Begins execution in 16-bit real mode for BIOS compatibility.
-- **Global Descriptor Table (GDT):** Sets up a flat memory model, simplifying early memory management.
-- **32-bit Protected Mode Transition:** Shifts the CPU into 32-bit protected mode, allowing access to more memory and advanced features.
-- **Sector Reading:** Reads sectors from the hard drive into memory, loading the kernel.
-- **BIOS Parameter Block (BPB) Avoidance:** Skips over the BPB to prevent unintended BIOS modifications.
+- **IDT Setup:** Configures the Interrupt Descriptor Table for handling hardware interrupts.
+- **Keyboard Interrupt Handler:** Handles keyboard press and release, displaying output on the screen.
 
 #### Detailed Functionality
 
-- **Segment Initialization:** Disables interrupts and initializes segment registers for a flat memory model.
-- **Stack Initialization:** Sets up a basic stack to facilitate subroutine calls.
-- **Protected Mode Entry:** Loads the GDT and switches the CPU to 32-bit protected mode.
-- **Kernel Loading:** Reads the kernel from disk into memory and transfers control to it.
+- **Interrupt Handlers:** Implements specific interrupt service routines, such as for keyboard interrupts.
+- **IDT Initialization:** Sets up IDT entries for various interrupts and loads the IDT.
 
-### Kernel (`kernel.asm`, `kernel.c`)
+### Memory Utilities (`/memory`)
 
-#### Key Features
+- Contains a simple `memset` function, essential for low-level memory operations.
 
-- **32-bit Protected Mode:** Operates entirely in 32-bit protected mode.
-- **Segment Register Setup:** Configures segment registers for protected mode operation.
-- **Stack Initialization:** Establishes a 32-bit stack for kernel operations.
-- **A20 Line Enable:** Ensures the A20 line is enabled for accessing higher memory.
-- **Screen Output:** Includes functionality to write "Hello World!" to the screen, demonstrating basic I/O capabilities.
+### I/O Utilities (`/io`)
 
-#### Operation
+- Provides basic functions for interacting with hardware I/O ports, crucial for device communication.
 
-Upon execution, the kernel sets up the necessary data structures and enters an infinite loop, representing the simplest form of a running system. The `kernel.c` file contains the screen output logic, initializing the VGA display and printing "Hello World!".
+### Kernel Modifications
 
-### Makefile
-
-- Compiles and links the kernel and bootloader.
-- Creates a binary image of the OS by combining the bootloader and kernel.
-
-### Linker Script (`linker.ld`)
-
-- Defines the memory layout for the kernel.
-- Sets the entry point and organizes various sections (.text, .rodata, .data, .bss) of the kernel.
-
-### Run Script (`run_os.sh`)
-
-- Automates the process of cleaning, building, and running the OS using QEMU.
+- **PIC Remapping:** `kernel.asm` now includes functionality to remap the Programmable Interrupt Controller.
+- **Keyboard Interaction:** Displays a message on the screen when a key is pressed and released.
 
 ## Build Instructions for CuriOS
 
 ### Prerequisites
 
-- Ensure you have `make`, NASM (Netwide Assembler), GCC, and QEMU installed on your system for compiling, assembling, and emulating the code.
+- Ensure `make`, NASM (Netwide Assembler), GCC, and QEMU are installed on your system.
 
 ### Steps
 
-1. **Clean Previous Builds:**
-    - Use `make clean` to remove any previous build artifacts.
+The `run_os.sh` script automates the building and emulation of the kernel. Specifically, it does the following:
 
-2. **Compile and Build:**
-    - Run `./build.sh` to compile and link the bootloader and kernel.
-
-3. **Run with QEMU:**
-    - Execute `./run_os.sh` to build and run CuriOS using QEMU.
+1. **Clean Previous Builds:** Use `make clean` to clear previous build artifacts.
+2. **Compile and Build:** Execute `./build.sh` to compile and link components.
+3. **Run with QEMU:** Run `qemu-system-i386 -hda ./os.bin`
 
 #### Notes
 
-- Make sure `build.sh` and `run_os.sh` are executable. Use `chmod +x build.sh run_os.sh` if necessary.
-- If you encounter issues, verify that all dependencies are installed and your environment is set up for x86 assembly and C development.
-- Adjust paths in the scripts if your directory structure differs.
+- Ensure `build.sh` and `run_os.sh` are executable (`chmod +x`).
+- Check all dependencies and environment setup for x86 assembly and C development.
 
 ## Additional Notes
 
-- CuriOS is fundamental, primarily for educational purposes.
-- It demonstrates basic OS development concepts like bootloader implementation, mode transitions, low-level memory management, and basic I/O operations.
-- This documentation covers the latest updates and is subject to change as CuriOS evolves.
+- CuriOS, designed primarily for educational purposes, now includes extended functionality like IDT handling, simple memory operations, and basic I/O utilities.
+- It demonstrates more advanced OS development concepts such as interrupt handling, memory management, and hardware I/O operations.
+- This documentation reflects the latest state of CuriOS and will be updated as the project evolves.
