@@ -3,6 +3,7 @@
 #include <stddef.h> // Standard definition types.
 #include "idt/idt.h"
 #include "io/io.h"
+#include "memory/heap/kheap.h"
 // VGA text mode video memory start address.
 uint16_t* video_mem = 0;
 
@@ -75,12 +76,33 @@ void print(const char* str) {
     }
 }
 
+// Helper function to print numbers as strings
+void print_number(size_t num) {
+    char buffer[20]; // Enough to hold any 64-bit number
+    int i = 19;
+    buffer[i] = '\0';
+    i--;
+
+    if (num == 0) {
+        buffer[i] = '0';
+        i--;
+    } else {
+        while (num != 0 && i >= 0) {
+            buffer[i] = '0' + (num % 10);
+            num /= 10;
+            i--;
+        }
+    }
+
+    print(&buffer[i + 1]);
+}
+
 // Main function of the kernel.
 void kernel_main() {
     terminal_initialize();
     print("Hello World! \n");
-    //Initilize the interrupt descriptor table
+    // Initialize the interrupt descriptor table
     idt_init();
     enable_interrupts();
-    
- }
+    kheap_init(); 
+}

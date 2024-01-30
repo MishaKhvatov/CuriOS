@@ -31,7 +31,9 @@ initialize_segments:
     ; Initialize Stack Segment
     mov ss, ax                 ; Set SS (Stack Segment) to 0
     mov sp, 0x7c00             ; Set SP (Stack Pointer) to the bootloader start address
-   
+    ;Get Map of Memory
+    call memory_map
+    
     sti ;Enable interrupt
 
 ; Enter Protected Mode
@@ -42,8 +44,64 @@ initialize_segments:
     or eax, 0x1                ; Set PE bit in CR0 to enable protected mode
     mov cr0, eax               ; Move updated EAX back to CR0
     jmp CODE_SEG: load_kernel32
+
+;Using INT 0x15, eax= 0xE820 function to get a memory map
+memory_map:
+.first_call:
+    mov di, 0x504 ; Destination buffer, 0x504 -> magic number
+    xor ebx, ebx ; Clear EBX
+    xor bp, bp  ; BP will be entry count
     
-     
+    ;Preparing to call BIOS function
+    mov edx, 0x0534D4150 ; ASCII characters for "SMAP" - the bios needs this signature for error checking
+    mov eax, 0xE820 ; Function Numbers
+    mov [es:di +20], dword 1 ; Sets 'Extended Attributes' field to 0x01 to ensure ACPI compatability
+    mov ecx, 24 ;Asking for 24 bytes
+
+    ;Function Call
+    int 0x15
+
+    ;Test to see if function call worked
+    jc short .failed ; Failed on first call means unsupported function
+    test ebx, ebx ; check if ebx = 0 (means list is one entry long, so worthless)
+    je short .failed 
+
+    jmp short .loop_start
+
+.loop_start:
+    jcxz .skip_entry ;Skips 0 byte entries (ECX is the number of bytes returned by the BIOS )
+    cmp cl,20 ;make sure we got a 20 byte entry back
+    
+    jbe short .no_text
+    test byte [es:di +  20],1
+    je short .skip_entry
+.loop:
+    mov eax, 0xE820 ;eax gets trashed on every call
+    mov [es:di +20], dword 1
+    mov ecx,24
+    int 0x15
+    jc short .final ;if carry set, end of list reached
+    mov edx, 0x0534D4150 ; repaire potentially trashed register
+
+.no_text:
+    ;Test for 0 
+    mov ecx, [es:di + 8]
+    or ecx, [es:di+12]
+    jz .skip_entry
+    inc bp ;if it is not 0, move to next storage spot
+    add di, 24
+
+.skip_entry:
+    test ebx, ebx  ;if ebx = 0, list is over
+    jne short .loop 
+.final:
+    mov [0x500],bp ;store the entry count
+    clc ;clear carry
+    ret
+.failed:
+    stc
+    ret
+
 ; Global Descriptor Table (GDT) Definitions
 gdt_start:
 gdt_null:                     ; Null descriptor as required by x86 architecture

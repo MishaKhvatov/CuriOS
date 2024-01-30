@@ -20,3 +20,4 @@ build/
 
 # If you have any specific IDE or editor configurations, ignore them
 .vscode
+.gdb_history
