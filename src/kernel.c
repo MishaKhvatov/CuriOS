@@ -4,6 +4,8 @@
 #include "idt/idt.h"
 #include "io/io.h"
 #include "memory/heap/kheap.h"
+#include "memory/paging/paging.h"
+
 // VGA text mode video memory start address.
 uint16_t* video_mem = 0;
 
@@ -103,6 +105,16 @@ void kernel_main() {
     print("Hello World! \n");
     // Initialize the interrupt descriptor table
     idt_init();
-    enable_interrupts();
     kheap_init(); 
+    
+    // Setup paging
+    uint32_t* kernel_page_dir = paging_create_directory(PAGING_IS_WRITEABLE | PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL);
+    paging_switch_directory(kernel_page_dir);
+    
+    char* ptr = kzalloc(4096);
+    page_set(kernel_page_dir, (void*)0x1000, (uint32_t)ptr ,  PAGING_ACCESS_FROM_ALL | PAGING_IS_PRESENT | PAGING_IS_WRITEABLE );
+    enable_paging();  
+    
+    enable_interrupts();
+    
 }

@@ -1,6 +1,7 @@
 #include "config.h"
 #include "kheap.h"
 #include "kernel.h"
+#include "memory/memory.h"
 static heap_table_t kheap_table;
 static heap_t kheap;
 
@@ -16,7 +17,12 @@ void kheap_init(){
 void* kmalloc(size_t size){
     return heap_malloc(&kheap, size);
 }
-
+void* kzalloc(size_t size){
+    void* ptr = kmalloc(size);
+    if(!ptr) return NULL;
+    memset(ptr, 0, size);
+    return ptr;
+}
 void kfree(void* ptr)
 {
     heap_free(&kheap, ptr);
